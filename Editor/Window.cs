@@ -1,3 +1,4 @@
+using System;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -30,6 +31,11 @@ namespace AssetReferenceViewer
 			Selection.selectionChanged += OnSelectionChanged;
 		}
 
+		private void OnDestroy()
+		{
+			Selection.selectionChanged -= OnSelectionChanged;
+		}
+
 		private void OnSelectionChanged()
 		{
 			Initialize();
@@ -46,7 +52,7 @@ namespace AssetReferenceViewer
 
 			string selectedPath = AssetDatabase.GetAssetPath(Selection.activeObject);
 
-			visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/project-curator/Editor/AssetReferenceViewer.uxml");
+			visualTree = Resources.Load<VisualTreeAsset>("AssetReferenceViewer");
 			var rootView = rootVisualElement;
 			var root = visualTree.CloneTree().Q<VisualElement>("Root");
 			rootView.Clear();
@@ -56,7 +62,7 @@ namespace AssetReferenceViewer
 			graphViewer.Initialize(Selection.activeObject);
 			var graph = rootView.Q<VisualElement>("Graph");
 			graph.Add(graphViewer);
-			
+
 			var objName = root.Q<Label>("ObjName");
 			objName.text = Selection.activeObject.name;
 			var objPath = root.Q<Label>("Path");
@@ -73,6 +79,8 @@ namespace AssetReferenceViewer
 			if (selectedAssetInfo == null)
 			{
 				AssetReferenceViewer.RebuildDatabase();
+				EditorApplication.delayCall = Initialize;
+				return;
 			}
 
 			helpBox.style.display = DisplayStyle.None;
@@ -147,7 +155,7 @@ namespace AssetReferenceViewer
 					AssetReferenceViewer.RemoveAssetFromDatabase(selectedPath);
 				};
 			}
-			
+
 			EditorApplication.delayCall = ()=>
 			{
 				graphViewer.FrameAll();
