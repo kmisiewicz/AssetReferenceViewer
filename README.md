@@ -1,7 +1,7 @@
-# Project Curator
+# Asset Reference Viewer
 
 A convenient tool to cleanup and maintain your Unity projects !    
-**Project Curator** is an Unity Editor window that, based on the currently selected Asset, displays the following information :
+**Asset Reference Viewer** is an Unity Editor window that, based on the currently selected Asset, displays the following information :
 
 - Each asset it depends on (called **dependencies**)
 
@@ -17,9 +17,7 @@ A convenient tool to cleanup and maintain your Unity projects !
 - Install package
   - Using Git : In Unity, click **Window > Package Manager > + > Add package from git URL...** and add `git@github.com:ogxd/project-curator.git`
   - Manually : Download the .zip, unzip and in Unity click **Window > Package Manager > + > Add package from disck...** and select the downloaded `package.json`
-  - ~~With Unitypackage : Download the .unitypackage in the release tab.~~ *Not available anymore since version 1.2*
-- When installed in Unity, click **Window > Project Curator** (and dock the window somewhere maybe)
-- Select an asset to visualize dependencies and referencers.
+- Select an asset to visualize dependencies and references.
 
 > You will need to Rebuild the database on the first run. There should be a button for it in the window (or do a right click on the window tab). The database should update automatically afterwards, even when assets are created, moved or deleted. Feel free to rebuild the database again if there is an issue.
 
