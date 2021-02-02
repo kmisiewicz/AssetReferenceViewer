@@ -1,6 +1,6 @@
 {
   "name": "com.assetreferenceviewer",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "unity": "2020.1",
   "displayName": "Asset Reference Viewer",
   "keywords": ["Project", "Reference", "Editor", "Cleanup", "Dependencies", "Dependency"],
