@@ -70,6 +70,8 @@ namespace AssetReferenceViewer
 			var icon = root.Q<VisualElement>("AssetIcon");
 			icon.style.backgroundImage = new StyleBackground((Texture2D) AssetDatabase.GetCachedIcon(selectedPath));
 
+			var scroll = root.Q<ScrollView>("Scroll");
+
 			if (Directory.Exists(selectedPath))
 				return;
 
@@ -93,9 +95,11 @@ namespace AssetReferenceViewer
 			var dependenciesFoldout = root.Q<Foldout>("Dependencies");
 			dependenciesFoldout.Clear();
 			dependenciesFoldout.text = "Dependencies (" + selectedAssetInfo.dependencies.Count + ")";
+			scroll.Add(dependenciesFoldout);
 			var referencesFoldout = root.Q<Foldout>("References");
 			referencesFoldout.Clear();
 			referencesFoldout.text = "References (" + selectedAssetInfo.references.Count + ")";
+			scroll.Add(referencesFoldout);
 
 			foreach (var d in selectedAssetInfo.dependencies)
 			{
