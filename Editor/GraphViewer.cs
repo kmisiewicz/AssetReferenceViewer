@@ -1,10 +1,9 @@
-using AssetReferenceViewer;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Editor
+namespace AssetReferenceViewer
 {
 	public class GraphViewer : GraphView
 	{
@@ -18,41 +17,39 @@ namespace Editor
 			this.AddManipulator(new SelectionDragger());
 			this.AddManipulator(new RectangleSelector());
 			this.AddManipulator(new ClickSelector());
-
-			contentViewContainer.transform.scale = Vector3.one * 0.75f;
 		}
 
 		public void Initialize(Object current)
 		{
-			foreach (var item in contentViewContainer.Children())
-			{
-				item.Clear();
-			}
+			contentViewContainer.Clear();
 
 			if (current == null)
 			{
 				return;
 			}
 
-			var curNode = new ObjNode(current);
-			curNode.Q("node-border").style.borderLeftColor = ObjNode.CurBorderColor;
-			curNode.Q("node-border").style.borderRightColor = ObjNode.CurBorderColor;
-			curNode.Q("node-border").style.borderBottomColor = ObjNode.CurBorderColor;
-			curNode.Q("node-border").style.borderTopColor = ObjNode.CurBorderColor;
+			var curNode = new NodeMaker(current);
+			curNode.Q("node-border").style.borderLeftColor = NodeMaker.CurBorderColor;
+			curNode.Q("node-border").style.borderRightColor = NodeMaker.CurBorderColor;
+			curNode.Q("node-border").style.borderBottomColor = NodeMaker.CurBorderColor;
+			curNode.Q("node-border").style.borderTopColor = NodeMaker.CurBorderColor;
 			AddElement(curNode);
 
 			const int offsetH = 600;
 			const int deltaV = 260;
+			AssetInfo selectedAssetInfo = AssetReferenceViewer.GetAsset(AssetDatabase.GetAssetPath(current));
+			if (selectedAssetInfo == null) return;
 
-			#region AddReference
+			var i = 0;
+
 			{
-				var deps = AssetDatabase.GetDependencies(curNode.Path,false);
-				var half = deps.Length / 2;
-				bool even = deps.Length % 2 == 0;
+				var deps = selectedAssetInfo.dependencies;
+				var half = deps.Count / 2;
+				bool even = deps.Count % 2 == 0;
 
-				for (int i = 0; i < deps.Length; i++)
+				foreach (var d in deps)
 				{
-					var item = deps[i];
+					var item = d;
 					var obj = AssetDatabase.LoadAssetAtPath(item, typeof(Object));
 					if (obj == null)
 					{
@@ -60,15 +57,14 @@ namespace Editor
 					}
 					else
 					{
-						var node = new ObjNode(obj);
+						var node = new NodeMaker(obj);
 						node.style.left = - offsetH;
 						node.style.top = (i - half) * deltaV + (even ? deltaV/2 : 0);
 
 						node.AddManipulator(new DoubleClickManipulator(()=>
 						{
+							Selection.activeObject = obj;
 							Initialize(obj);
-							SetPosition(new Vector2((worldBound.width - ObjNode.width) / 2,
-								(worldBound.height - ObjNode.heigth) / 2));
 						}));
 
 						AddElement(node);
@@ -76,20 +72,20 @@ namespace Editor
 						var edge = curNode.InPort.ConnectTo(node.OutPort);
 						AddElement(edge);
 					}
+
+					i++;
 				}
 
+				i = 0;
 			}
-			#endregion
 
-			#region AddReferenceBy
-
-			if (ReferenceViewerWindow.CacheTree.TryGetValue(curNode.PathHashCode, out var refby))
 			{
-				var half = refby.Count / 2;
-				bool even = refby.Count % 2 == 0;
-				for (int i = 0; i < refby.Count; i++)
+				var refs = selectedAssetInfo.references;
+				var half = refs.Count / 2;
+				bool even = refs.Count % 2 == 0;
+				foreach (var r in refs)
 				{
-					var item = refby[i];
+					var item = r;
 					var path = string.Join("/", item);
 					var obj = AssetDatabase.LoadAssetAtPath(path, typeof(Object));
 					if (obj == null)
@@ -98,15 +94,14 @@ namespace Editor
 					}
 					else
 					{
-						var node = new ObjNode(obj);
+						var node = new NodeMaker(obj);
 						node.style.left = offsetH;
 						node.style.top = (i - half) * deltaV + (even ? deltaV / 2 : 0);
 
 						node.AddManipulator(new DoubleClickManipulator(() =>
 						{
+							Selection.activeObject = obj;
 							Initialize(obj);
-							SetPosition(new Vector2((worldBound.width - ObjNode.width) / 2,
-								(worldBound.height - ObjNode.heigth) / 2));
 						}));
 
 						AddElement(node);
@@ -114,15 +109,10 @@ namespace Editor
 						var edge = curNode.OutPort.ConnectTo(node.InPort);
 						AddElement(edge);
 					}
+
+					i++;
 				}
 			}
-
-			#endregion
-		}
-
-		public void SetPosition(Vector3 vector)
-		{
-			contentViewContainer.transform.position = vector;
 		}
 
 		protected override bool canCutSelection => false;

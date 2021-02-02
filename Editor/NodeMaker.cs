@@ -9,13 +9,13 @@ namespace AssetReferenceViewer
 {
 	public class NodeMaker : Node
 	{
-		public const int width = 136;
-		public const int heigth = 230;
-		public static readonly Color InColor = Color.red * 0.95f;
-		public static readonly Color OutColor = Color.green * 0.95f;
+		private const int width = 136;
+		private const int heigth = 230;
+		private static readonly Color InColor = Color.red * 0.95f;
+		private static readonly Color OutColor = Color.green * 0.95f;
 		public static readonly Color CurBorderColor = new Color(0.849f, 0.514f, 0.1f, 1);
-		public string Path { get; }
-		public int PathHashCode { get; }
+		private string Path { get; }
+		private int PathHashCode { get; }
 
 		public NodeMaker(UnityEngine.Object obj)
 		{
@@ -39,12 +39,15 @@ namespace AssetReferenceViewer
 			of.SetCanSelect(false);
 			controlsContainer.Add(of);
 
-			var img = new Image {style = {height = 128, width = 128}};
-			img.image = AssetPreview.GetAssetPreview(obj) ?? AssetPreview.GetMiniThumbnail(obj);
+			var img = new Image
+			{
+				style = {height = 128, width = 128},
+				image = AssetPreview.GetAssetPreview(obj) ?? AssetPreview.GetMiniThumbnail(obj)
+			};
 			controlsContainer.Add(img);
 
 			OutPort = Port.Create<Edge>(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(object));
-			OutPort.portName = "ref-by";
+			OutPort.portName = "  dep  ";
 			OutPort.portColor = InColor;
 			outputContainer.Add(OutPort);
 
@@ -72,7 +75,7 @@ namespace AssetReferenceViewer
 			this.callback = callback;
 		}
 
-		public DateTime LastClick { get; private set; } = DateTime.MinValue;
+		private DateTime LastClick { get; set; } = DateTime.MinValue;
 
 		protected override void RegisterCallbacksOnTarget()
 		{

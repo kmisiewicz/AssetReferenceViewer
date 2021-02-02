@@ -42,7 +42,7 @@ namespace AssetReferenceViewer
                     continue;
                 if (pathToAssetInfo.TryGetValue(dependency, out AssetInfo depInfo)) {
                     assetInfo.dependencies.Add(dependency);
-                    depInfo.referencers.Add(assetInfo.path);
+                    depInfo.references.Add(assetInfo.path);
                     // Included status may have changed and need to be recomputed
                     depInfo.ClearIncludedStatus();
                 }
@@ -52,7 +52,7 @@ namespace AssetReferenceViewer
         public static void RemoveAssetFromDatabase(string asset)
         {
             if (pathToAssetInfo.TryGetValue(asset, out AssetInfo assetInfo)) {
-                foreach (string referencer in assetInfo.referencers) {
+                foreach (string referencer in assetInfo.references) {
                     if (pathToAssetInfo.TryGetValue(referencer, out AssetInfo referencerAssetInfo)) {
                         if (referencerAssetInfo.dependencies.Remove(asset)) {
                             referencerAssetInfo.ClearIncludedStatus();
@@ -66,7 +66,7 @@ namespace AssetReferenceViewer
                 }
                 foreach (string dependency in assetInfo.dependencies) {
                     if (pathToAssetInfo.TryGetValue(dependency, out AssetInfo dependencyAssetInfo)) {
-                        if (dependencyAssetInfo.referencers.Remove(asset)) {
+                        if (dependencyAssetInfo.references.Remove(asset)) {
                             dependencyAssetInfo.ClearIncludedStatus();
                         } else {
                             // Non-Reciprocity Error

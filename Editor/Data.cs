@@ -7,7 +7,7 @@ namespace AssetReferenceViewer
     [Serializable]
     public class Data
     {
-        private const string JSON_PATH = "ProjectSettings/ProjectCuratorSettings.json";
+        private const string JSON_PATH = "ProjectSettings/AssetReferenceViewerSettings.json";
 
         [SerializeField]
         private bool isUpToDate = false;

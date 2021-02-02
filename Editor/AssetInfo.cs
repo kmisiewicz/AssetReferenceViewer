@@ -24,7 +24,7 @@ namespace AssetReferenceViewer
     {
 
         [NonSerialized]
-        public HashSet<string> referencers = new HashSet<string>();
+        public HashSet<string> references = new HashSet<string>();
 
         [NonSerialized]
         public HashSet<string> dependencies = new HashSet<string>();
@@ -37,13 +37,13 @@ namespace AssetReferenceViewer
 
         public void OnBeforeSerialize()
         {
-            _references = referencers.ToArray();
+            _references = references.ToArray();
             _dependencies = dependencies.ToArray();
         }
 
         public void OnAfterDeserialize()
         {
-            referencers = new HashSet<string>(_references ?? new string[0]);
+            references = new HashSet<string>(_references ?? new string[0]);
             dependencies = new HashSet<string>(_dependencies ?? new string[0]);
         }
 
@@ -57,7 +57,7 @@ namespace AssetReferenceViewer
 
         public string[] GetDependencies()
         {
-            return AssetDatabase.GetDependencies(path);
+            return AssetDatabase.GetDependencies(path, false);
         }
 
         public void ClearIncludedStatus()
@@ -83,7 +83,7 @@ namespace AssetReferenceViewer
         private IncludedInBuild CheckIncludedStatus()
         {
 
-            foreach (var referencer in referencers) {
+            foreach (var referencer in references) {
                 AssetInfo refInfo = AssetReferenceViewer.GetAsset(referencer);
                 if (refInfo.IsIncludedInBuild) {
                     return IncludedInBuild.Referenced;
