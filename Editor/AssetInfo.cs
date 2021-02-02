@@ -84,7 +84,7 @@ namespace AssetReferenceViewer
         {
 
             foreach (var referencer in referencers) {
-                AssetInfo refInfo = ProjectCurator.GetAsset(referencer);
+                AssetInfo refInfo = AssetReferenceViewer.GetAsset(referencer);
                 if (refInfo.IsIncludedInBuild) {
                     return IncludedInBuild.Referenced;
                 }

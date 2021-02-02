@@ -7,15 +7,15 @@ using System.IO;
 
 namespace AssetReferenceViewer
 {
-    public static class ProjectCurator
+    public static class AssetReferenceViewer
     {
         [NonSerialized]
         private static Dictionary<string, AssetInfo> pathToAssetInfo;
 
-        static ProjectCurator()
+        static AssetReferenceViewer()
         {
             pathToAssetInfo = new Dictionary<string, AssetInfo>();
-            var assetInfos = ProjectCuratorData.AssetInfos;
+            var assetInfos = Data.AssetInfos;
             for (int i = 0; i < assetInfos.Length; i++) {
                 pathToAssetInfo.Add(assetInfos[i].path, assetInfos[i]);
             }
@@ -118,7 +118,7 @@ namespace AssetReferenceViewer
 
             EditorUtility.ClearProgressBar();
 
-            ProjectCuratorData.IsUpToDate = true;
+            Data.IsUpToDate = true;
 
             SaveDatabase();
         }
@@ -133,8 +133,8 @@ namespace AssetReferenceViewer
                 assetInfos[i] = pair.Value;
                 i++;
             }
-            ProjectCuratorData.AssetInfos = assetInfos;
-            ProjectCuratorData.Save();
+            Data.AssetInfos = assetInfos;
+            Data.Save();
         }
     }
 }
