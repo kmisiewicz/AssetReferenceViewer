@@ -5,17 +5,17 @@ using System;
 using System.Linq;
 using System.IO;
 
-namespace Ogxd.ProjectCurator
+namespace AssetReferenceViewer
 {
-    public static class ProjectCurator
+    public static class AssetReferenceViewer
     {
         [NonSerialized]
         private static Dictionary<string, AssetInfo> pathToAssetInfo;
 
-        static ProjectCurator()
+        static AssetReferenceViewer()
         {
             pathToAssetInfo = new Dictionary<string, AssetInfo>();
-            var assetInfos = ProjectCuratorData.AssetInfos;
+            var assetInfos = Data.AssetInfos;
             for (int i = 0; i < assetInfos.Length; i++) {
                 pathToAssetInfo.Add(assetInfos[i].path, assetInfos[i]);
             }
@@ -42,7 +42,7 @@ namespace Ogxd.ProjectCurator
                     continue;
                 if (pathToAssetInfo.TryGetValue(dependency, out AssetInfo depInfo)) {
                     assetInfo.dependencies.Add(dependency);
-                    depInfo.referencers.Add(assetInfo.path);
+                    depInfo.references.Add(assetInfo.path);
                     // Included status may have changed and need to be recomputed
                     depInfo.ClearIncludedStatus();
                 }
@@ -52,7 +52,7 @@ namespace Ogxd.ProjectCurator
         public static void RemoveAssetFromDatabase(string asset)
         {
             if (pathToAssetInfo.TryGetValue(asset, out AssetInfo assetInfo)) {
-                foreach (string referencer in assetInfo.referencers) {
+                foreach (string referencer in assetInfo.references) {
                     if (pathToAssetInfo.TryGetValue(referencer, out AssetInfo referencerAssetInfo)) {
                         if (referencerAssetInfo.dependencies.Remove(asset)) {
                             referencerAssetInfo.ClearIncludedStatus();
@@ -66,7 +66,7 @@ namespace Ogxd.ProjectCurator
                 }
                 foreach (string dependency in assetInfo.dependencies) {
                     if (pathToAssetInfo.TryGetValue(dependency, out AssetInfo dependencyAssetInfo)) {
-                        if (dependencyAssetInfo.referencers.Remove(asset)) {
+                        if (dependencyAssetInfo.references.Remove(asset)) {
                             dependencyAssetInfo.ClearIncludedStatus();
                         } else {
                             // Non-Reciprocity Error
@@ -118,7 +118,7 @@ namespace Ogxd.ProjectCurator
 
             EditorUtility.ClearProgressBar();
 
-            ProjectCuratorData.IsUpToDate = true;
+            Data.IsUpToDate = true;
 
             SaveDatabase();
         }
@@ -133,8 +133,8 @@ namespace Ogxd.ProjectCurator
                 assetInfos[i] = pair.Value;
                 i++;
             }
-            ProjectCuratorData.AssetInfos = assetInfos;
-            ProjectCuratorData.Save();
+            Data.AssetInfos = assetInfos;
+            Data.Save();
         }
     }
 }

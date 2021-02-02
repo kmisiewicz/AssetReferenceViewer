@@ -1,12 +1,12 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace Ogxd.ProjectCurator
+namespace AssetReferenceViewer
 {
     [InitializeOnLoad]
-    public static partial class ProjectWindowOverlay
+    public static partial class WindowOverlay
     {
-        static ProjectWindowOverlay()
+        static WindowOverlay()
         {
             enabled = Enabled;
             EditorApplication.projectWindowItemOnGUI += ProjectWindowItemOnGUI;
@@ -14,13 +14,13 @@ namespace Ogxd.ProjectCurator
 
         private static void ProjectWindowItemOnGUI(string guid, Rect rect)
         {
-            if (enabled) {
-                AssetInfo assetInfo = ProjectCurator.GetAsset(AssetDatabase.GUIDToAssetPath(guid));
-                if (assetInfo != null) {
+            if (enabled) 
+            {
+                AssetInfo assetInfo = AssetReferenceViewer.GetAsset(AssetDatabase.GUIDToAssetPath(guid));
+                if (assetInfo != null) 
+                {
                     var content = new GUIContent(assetInfo.IsIncludedInBuild ? ProjectIcons.LinkBlue : ProjectIcons.LinkBlack, assetInfo.IncludedStatus.ToString());
                     GUI.Label(new Rect(rect.width + rect.x - 20, rect.y + 1, 16, 16), content);
-                } else {
-
                 }
             }
         }
@@ -29,11 +29,9 @@ namespace Ogxd.ProjectCurator
 
         public static bool Enabled {
             get {
-                return enabled = EditorPrefs.GetBool("ProjectCurator_PWO");
+                return enabled = EditorPrefs.GetBool("AssetReferenceViewer");
             }
-            set {
-                EditorPrefs.SetBool("ProjectCurator_PWO", enabled = value);
-            }
+            set => EditorPrefs.SetBool("AssetReferenceViewer", enabled = value);
         }
     }
 }

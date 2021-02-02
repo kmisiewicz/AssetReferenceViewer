@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System;
 
-namespace Ogxd.ProjectCurator
+namespace AssetReferenceViewer
 {
     /// <summary>
     /// The purpose of this class is to try detecting asset changes to automatically update the ProjectCurator database.
@@ -29,13 +29,13 @@ namespace Ogxd.ProjectCurator
 
         static string[] OnWillSaveAssets(string[] paths)
         {
-            if (ProjectCuratorData.IsUpToDate) {
+            if (Data.IsUpToDate) {
                 Actions.Enqueue(() => {
                     foreach (string path in paths) {
-                        ProjectCurator.RemoveAssetFromDatabase(path);
-                        ProjectCurator.AddAssetToDatabase(path);
+                        AssetReferenceViewer.RemoveAssetFromDatabase(path);
+                        AssetReferenceViewer.AddAssetToDatabase(path);
                     }
-                    ProjectCurator.SaveDatabase();
+                    AssetReferenceViewer.SaveDatabase();
                 });
             }
             return paths;
@@ -43,30 +43,30 @@ namespace Ogxd.ProjectCurator
 
         static void OnWillCreateAsset(string assetName)
         {
-            if (ProjectCuratorData.IsUpToDate) {
+            if (Data.IsUpToDate) {
                 Actions.Enqueue(() => {
-                    ProjectCurator.AddAssetToDatabase(assetName);
-                    ProjectCurator.SaveDatabase();
+                    AssetReferenceViewer.AddAssetToDatabase(assetName);
+                    AssetReferenceViewer.SaveDatabase();
                 });
             }
         }
 
         static AssetDeleteResult OnWillDeleteAsset(string assetName, RemoveAssetOptions removeAssetOptions)
         {
-            if (ProjectCuratorData.IsUpToDate) {
-                ProjectCurator.RemoveAssetFromDatabase(assetName);
-                ProjectCurator.SaveDatabase();
+            if (Data.IsUpToDate) {
+                AssetReferenceViewer.RemoveAssetFromDatabase(assetName);
+                AssetReferenceViewer.SaveDatabase();
             }
             return AssetDeleteResult.DidNotDelete;
         }
 
         static AssetMoveResult OnWillMoveAsset(string sourcePath, string destinationPath)
         {
-            if (ProjectCuratorData.IsUpToDate) {
+            if (Data.IsUpToDate) {
                 Actions.Enqueue(() => {
-                    ProjectCurator.RemoveAssetFromDatabase(sourcePath);
-                    ProjectCurator.AddAssetToDatabase(destinationPath);
-                    ProjectCurator.SaveDatabase();
+                    AssetReferenceViewer.RemoveAssetFromDatabase(sourcePath);
+                    AssetReferenceViewer.AddAssetToDatabase(destinationPath);
+                    AssetReferenceViewer.SaveDatabase();
                 });
             }
             return AssetMoveResult.DidNotMove;

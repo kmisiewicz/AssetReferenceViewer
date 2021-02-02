@@ -1,5 +1,6 @@
 {
-    "name": "Ogxd.ProjectCurator",
+    "name": "AssetReferenceViewer",
+    "rootNamespace": "",
     "references": [],
     "includePlatforms": [
         "Editor"

@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace Ogxd.ProjectCurator
+namespace AssetReferenceViewer
 {
     public enum IncludedInBuild
     {
@@ -24,7 +24,7 @@ namespace Ogxd.ProjectCurator
     {
 
         [NonSerialized]
-        public HashSet<string> referencers = new HashSet<string>();
+        public HashSet<string> references = new HashSet<string>();
 
         [NonSerialized]
         public HashSet<string> dependencies = new HashSet<string>();
@@ -37,13 +37,13 @@ namespace Ogxd.ProjectCurator
 
         public void OnBeforeSerialize()
         {
-            _references = referencers.ToArray();
+            _references = references.ToArray();
             _dependencies = dependencies.ToArray();
         }
 
         public void OnAfterDeserialize()
         {
-            referencers = new HashSet<string>(_references ?? new string[0]);
+            references = new HashSet<string>(_references ?? new string[0]);
             dependencies = new HashSet<string>(_dependencies ?? new string[0]);
         }
 
@@ -57,7 +57,7 @@ namespace Ogxd.ProjectCurator
 
         public string[] GetDependencies()
         {
-            return AssetDatabase.GetDependencies(path);
+            return AssetDatabase.GetDependencies(path, false);
         }
 
         public void ClearIncludedStatus()
@@ -83,8 +83,8 @@ namespace Ogxd.ProjectCurator
         private IncludedInBuild CheckIncludedStatus()
         {
 
-            foreach (var referencer in referencers) {
-                AssetInfo refInfo = ProjectCurator.GetAsset(referencer);
+            foreach (var referencer in references) {
+                AssetInfo refInfo = AssetReferenceViewer.GetAsset(referencer);
                 if (refInfo.IsIncludedInBuild) {
                     return IncludedInBuild.Referenced;
                 }

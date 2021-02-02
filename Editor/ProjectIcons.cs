@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Ogxd.ProjectCurator
+namespace AssetReferenceViewer
 {
     public static class ProjectIcons
     {

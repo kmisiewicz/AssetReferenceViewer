@@ -2,12 +2,12 @@
 using System.IO;
 using UnityEngine;
 
-namespace Ogxd.ProjectCurator
+namespace AssetReferenceViewer
 {
     [Serializable]
-    public class ProjectCuratorData
+    public class Data
     {
-        private const string JSON_PATH = "ProjectSettings/ProjectCuratorSettings.json";
+        private const string JSON_PATH = "ProjectSettings/AssetReferenceViewerSettings.json";
 
         [SerializeField]
         private bool isUpToDate = false;
@@ -20,14 +20,14 @@ namespace Ogxd.ProjectCurator
             set => Instance.assetInfos = value;
         }
 
-        private static ProjectCuratorData instance;
-        public static ProjectCuratorData Instance {
+        private static Data instance;
+        public static Data Instance {
             get {
                 if (instance == null) {
                     if (File.Exists(JSON_PATH)) {
-                        instance = JsonUtility.FromJson<ProjectCuratorData>(File.ReadAllText(JSON_PATH));
+                        instance = JsonUtility.FromJson<Data>(File.ReadAllText(JSON_PATH));
                     } else {
-                        instance = new ProjectCuratorData();
+                        instance = new Data();
                         File.WriteAllText(JSON_PATH, JsonUtility.ToJson(instance));
                     }
                 }
