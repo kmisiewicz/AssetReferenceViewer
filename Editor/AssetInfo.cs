@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace Ogxd.ProjectCurator
+namespace AssetReferenceViewer
 {
     public enum IncludedInBuild
     {

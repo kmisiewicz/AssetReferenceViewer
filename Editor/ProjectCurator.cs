@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using System.IO;
 
-namespace Ogxd.ProjectCurator
+namespace AssetReferenceViewer
 {
     public static class ProjectCurator
     {

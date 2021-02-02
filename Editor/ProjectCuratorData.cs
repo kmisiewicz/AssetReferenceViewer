@@ -2,7 +2,7 @@
 using System.IO;
 using UnityEngine;
 
-namespace Ogxd.ProjectCurator
+namespace AssetReferenceViewer
 {
     [Serializable]
     public class ProjectCuratorData
