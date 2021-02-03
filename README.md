@@ -1,6 +1,6 @@
 # Asset Reference Viewer
 
-This is forked version of Project-Curator and heavily modified adding graph view and few other features.
+This is forked version of Project-Curator. I heavily modified this tool by adding graph view moving UI to Unity UI Elements and more.
 
 A convenient tool to cleanup and maintain your Unity projects !    
 **Asset Reference Viewer** is an Unity Editor window that, based on the currently selected Asset, displays the following information :
