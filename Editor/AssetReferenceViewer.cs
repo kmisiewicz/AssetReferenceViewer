@@ -78,7 +78,7 @@ namespace AssetReferenceViewer
                 }
                 pathToAssetInfo.Remove(asset);
             } else {
-                Debug.LogWarning($"Asset '{asset}' is not present in the database");
+                //Debug.LogWarning($"Asset '{asset}' is not present in the database");
             }
         }
 
