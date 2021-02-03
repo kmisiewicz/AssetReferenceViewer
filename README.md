@@ -13,7 +13,7 @@ A convenient tool to cleanup and maintain your Unity projects !
 - Whether the asset is included in the build or not, depending on the nature of the Asset and its referencers (checked recursively)  
   *Check statuses section for more information*
 
-![Screenshot](https://raw.githubusercontent.com/ogxd/project-curator/master/Demo/project-curator-big.gif)
+![Screenshot](https://raw.githubusercontent.com/ogxd/project-curator/master/Demo/preview.gif)
 
 ## How to use ?
 - Install package
