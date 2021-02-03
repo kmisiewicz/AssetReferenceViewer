@@ -17,11 +17,8 @@ A convenient tool to cleanup and maintain your Unity projects !
 
 ## How to use ?
 - Install package
-  - Using Git : In Unity, click **Window > Package Manager > + > Add package from git URL...** and add `git@github.com:ogxd/project-curator.git`
-  - Manually : Download the .zip, unzip and in Unity click **Window > Package Manager > + > Add package from disck...** and select the downloaded `package.json`
+  - Using Git : In Unity, click **Window > Package Manager > + > Add package from git URL...** and add `https://github.com/Dasparion/AssetReferenceViewer.git`
 - Select an asset to visualize dependencies and references.
-
-> You will need to Rebuild the database on the first run. There should be a button for it in the window (or do a right click on the window tab). The database should update automatically afterwards, even when assets are created, moved or deleted. Feel free to rebuild the database again if there is an issue.
 
 ## Statuses
 
