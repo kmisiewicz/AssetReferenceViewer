@@ -1,6 +1,6 @@
 {
   "name": "com.silverdale.asset-reference-viewer",
-  "version": "2.0.1",
+  "version": "2.0.3",
   "unity": "2020.1",
   "displayName": "Asset Reference Viewer",
   "keywords": ["Project", "Reference", "Editor", "Cleanup", "Dependencies", "Dependency"],
