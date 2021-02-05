@@ -38,80 +38,83 @@ namespace AssetReferenceViewer
 			const int offsetH = 600;
 			const int deltaV = 260;
 			AssetInfo selectedAssetInfo = AssetReferenceViewer.GetAsset(AssetDatabase.GetAssetPath(current));
-			if (selectedAssetInfo == null) return;
-
-			var i = 0;
-
+			if (selectedAssetInfo != null)
 			{
-				var deps = selectedAssetInfo.dependencies;
-				var half = deps.Count / 2;
-				bool even = deps.Count % 2 == 0;
 
-				foreach (var d in deps)
+				var i = 0;
+
 				{
-					var item = d;
-					var obj = AssetDatabase.LoadAssetAtPath(item, typeof(Object));
-					if (obj == null)
-					{
-						Debug.LogError(item);
-					}
-					else
-					{
-						var node = new NodeMaker(obj);
-						node.style.left = - offsetH;
-						node.style.top = (i - half) * deltaV + (even ? deltaV/2 : 0);
+					var deps = selectedAssetInfo.dependencies;
+					var half = deps.Count / 2;
+					bool even = deps.Count % 2 == 0;
 
-						node.AddManipulator(new DoubleClickManipulator(()=>
+					foreach (var d in deps)
+					{
+						var item = d;
+						var obj = AssetDatabase.LoadAssetAtPath(item, typeof(Object));
+						if (obj == null)
 						{
-							Selection.activeObject = obj;
-							Initialize(obj);
-						}));
+							Debug.LogError(item);
+						}
+						else
+						{
+							var node = new NodeMaker(obj);
+							node.style.left = - offsetH;
+							node.style.top = (i - half) * deltaV + (even ? deltaV/2 : 0);
 
-						AddElement(node);
+							node.AddManipulator(new DoubleClickManipulator(()=>
+							{
+								Selection.activeObject = obj;
+								Initialize(obj);
+							}));
 
-						var edge = curNode.InPort.ConnectTo(node.OutPort);
-						AddElement(edge);
+							AddElement(node);
+
+							var edge = curNode.InPort.ConnectTo(node.OutPort);
+							AddElement(edge);
+						}
+
+						i++;
 					}
 
-					i++;
+					i = 0;
 				}
 
-				i = 0;
-			}
-
-			{
-				var refs = selectedAssetInfo.references;
-				var half = refs.Count / 2;
-				bool even = refs.Count % 2 == 0;
-				foreach (var r in refs)
 				{
-					var item = r;
-					var path = string.Join("/", item);
-					var obj = AssetDatabase.LoadAssetAtPath(path, typeof(Object));
-					if (obj == null)
+					var refs = selectedAssetInfo.references;
+					var half = refs.Count / 2;
+					bool even = refs.Count % 2 == 0;
+					foreach (var r in refs)
 					{
-						Debug.LogError(item);
-					}
-					else
-					{
-						var node = new NodeMaker(obj);
-						node.style.left = offsetH;
-						node.style.top = (i - half) * deltaV + (even ? deltaV / 2 : 0);
-
-						node.AddManipulator(new DoubleClickManipulator(() =>
+						var item = r;
+						var path = string.Join("/", item);
+						var obj = AssetDatabase.LoadAssetAtPath(path, typeof(Object));
+						if (obj == null)
 						{
-							Selection.activeObject = obj;
-							Initialize(obj);
-						}));
+							Debug.LogError(item);
+						}
+						else
+						{
+							var node = new NodeMaker(obj);
+							node.style.left = offsetH;
+							node.style.top = (i - half) * deltaV + (even ? deltaV / 2 : 0);
 
-						AddElement(node);
+							node.AddManipulator(new DoubleClickManipulator(() =>
+							{
+								Selection.activeObject = obj;
+								Initialize(obj);
+							}));
 
-						var edge = curNode.OutPort.ConnectTo(node.InPort);
-						AddElement(edge);
+							AddElement(node);
+
+							var edge = curNode.OutPort.ConnectTo(node.InPort);
+							AddElement(edge);
+						}
+
+						i++;
 					}
-
-					i++;
 				}
+
 			}
 		}
 

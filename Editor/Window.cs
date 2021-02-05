@@ -50,8 +50,6 @@ namespace AssetReferenceViewer
 		{
 			if (Selection.activeObject == null) return;
 
-			string selectedPath = AssetDatabase.GetAssetPath(Selection.activeObject);
-
 			visualTree = Resources.Load<VisualTreeAsset>("AssetReferenceViewer");
 			var rootView = rootVisualElement;
 			var root = visualTree.CloneTree().Q<VisualElement>("Root");
@@ -63,12 +61,24 @@ namespace AssetReferenceViewer
 			var graph = rootView.Q<VisualElement>("Graph");
 			graph.Add(graphViewer);
 
+			var helpBox = root.Q<VisualElement>("HelpBox");
+			helpBox.style.display = DisplayStyle.None;
+
+			string selectedPath = AssetDatabase.GetAssetPath(Selection.activeObject);
+
 			var objName = root.Q<Label>("ObjName");
 			objName.text = Selection.activeObject.name;
 			var objPath = root.Q<Label>("Path");
 			objPath.text = selectedPath;
 			var icon = root.Q<VisualElement>("AssetIcon");
 			icon.style.backgroundImage = new StyleBackground((Texture2D) AssetDatabase.GetCachedIcon(selectedPath));
+
+			if (!selectedPath.StartsWith("Assets/"))
+			{
+				var helpB = new HelpBox("This asset is outside Assets folder or you selected something in the scene", HelpBoxMessageType.Warning);
+				graphViewer.Add(helpB);
+				return;
+			}
 
 			var scroll = root.Q<ScrollView>("Scroll");
 
@@ -77,15 +87,12 @@ namespace AssetReferenceViewer
 
 			AssetInfo selectedAssetInfo = AssetReferenceViewer.GetAsset(selectedPath);
 
-			var helpBox = root.Q<VisualElement>("HelpBox");
 			if (selectedAssetInfo == null)
 			{
 				AssetReferenceViewer.RebuildDatabase();
 				EditorApplication.delayCall = Initialize;
 				return;
 			}
-
-			helpBox.style.display = DisplayStyle.None;
 
 			var buildStatusIcon = root.Q<VisualElement>("BuildStatusIcon");
 			buildStatusIcon.style.backgroundImage =
@@ -150,6 +157,7 @@ namespace AssetReferenceViewer
 				var helpButton = root.Q<Button>("HelpButton");
 				var helpIcon = root.Q<VisualElement>("HelpIcon");
 				helpButton.text = "Delete Asset";
+				helpButton.style.display = DisplayStyle.Flex;
 				helpLabel.text = "This asset is not referenced and never used. Would you like to delete it ?";
 				helpIcon.style.backgroundImage = (Texture2D) EditorGUIUtility.IconContent("console.warnicon").image;
 				helpButton.clicked += ()=>
