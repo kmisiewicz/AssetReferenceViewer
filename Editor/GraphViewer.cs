@@ -54,7 +54,8 @@ namespace AssetReferenceViewer
 						var obj = AssetDatabase.LoadAssetAtPath(item, typeof(Object));
 						if (obj == null)
 						{
-							Debug.LogError(item);
+							AssetReferenceViewer.RebuildDatabase();
+							return;
 						}
 						else
 						{
