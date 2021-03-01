@@ -4,5 +4,9 @@
   "unity": "2020.1",
   "displayName": "Asset Reference Viewer",
   "keywords": ["Project", "Reference", "Editor", "Cleanup", "Dependencies", "Dependency"],
-  "description": "A convenient tool to help cleaning and maintaining Unity Projects"
+  "description": "A convenient tool to help cleaning and maintaining Unity Projects",
+  "author": {
+    "name": "Silverdale",
+    "url": "https://github.com/Dasparion"
+  }
 }
