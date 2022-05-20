@@ -12,7 +12,8 @@ namespace AssetReferenceViewer
         [InitializeOnLoadMethod]
         public static void Init()
         {
-            EditorApplication.update += OnUpdate;
+            //EditorApplication.update += OnUpdate;
+
         }
 
         /// <summary>
