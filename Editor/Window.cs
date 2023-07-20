@@ -116,6 +116,7 @@ namespace AssetReferenceViewer
 				var inBuildIcon = item.Q<VisualElement>("InBuildIcon");
 
 				itemLabel.text = Path.GetFileName(d);
+				itemLabel.tooltip = d;
 				item.RegisterCallback<MouseUpEvent>(e =>
 				{
 					Selection.activeObject = AssetDatabase.LoadAssetAtPath<Object>(d);
@@ -137,7 +138,8 @@ namespace AssetReferenceViewer
 				var inBuildIcon = item.Q<VisualElement>("InBuildIcon");
 
 				itemLabel.text = Path.GetFileName(r);
-				item.RegisterCallback<MouseUpEvent>(e =>
+                itemLabel.tooltip = r;
+                item.RegisterCallback<MouseUpEvent>(e =>
 				{
 					Selection.activeObject = AssetDatabase.LoadAssetAtPath<Object>(r);
 				});
