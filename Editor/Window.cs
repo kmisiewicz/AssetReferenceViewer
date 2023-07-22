@@ -116,10 +116,12 @@ namespace AssetReferenceViewer
 				var inBuildIcon = item.Q<VisualElement>("InBuildIcon");
 
 				itemLabel.text = Path.GetFileName(d);
-				itemLabel.tooltip = d;
+                itemLabel.style.unityFontStyleAndWeight = FontStyle.Normal;
+                itemLabel.tooltip = d;
 				item.RegisterCallback<MouseUpEvent>(e =>
 				{
-					Selection.activeObject = AssetDatabase.LoadAssetAtPath<Object>(d);
+					if (e.button == 0)
+						Selection.activeObject = AssetDatabase.LoadAssetAtPath<Object>(d);
 				});
 				itemIcon.style.backgroundImage = AssetDatabase.GetCachedIcon(d) as Texture2D;
 				AssetInfo depInfo = AssetReferenceViewer.GetAsset(d);
@@ -138,10 +140,12 @@ namespace AssetReferenceViewer
 				var inBuildIcon = item.Q<VisualElement>("InBuildIcon");
 
 				itemLabel.text = Path.GetFileName(r);
+                itemLabel.style.unityFontStyleAndWeight = FontStyle.Normal;
                 itemLabel.tooltip = r;
                 item.RegisterCallback<MouseUpEvent>(e =>
 				{
-					Selection.activeObject = AssetDatabase.LoadAssetAtPath<Object>(r);
+                    if (e.button == 0)
+                        Selection.activeObject = AssetDatabase.LoadAssetAtPath<Object>(r);
 				});
 				itemIcon.style.backgroundImage = AssetDatabase.GetCachedIcon(r) as Texture2D;
 				AssetInfo depInfo = AssetReferenceViewer.GetAsset(r);
