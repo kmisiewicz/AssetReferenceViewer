@@ -7,10 +7,15 @@ namespace AssetReferenceViewer
 {
 	public class GraphViewer : GraphView
 	{
-		static readonly Color BGColor = new Color(0.125f, 0.125f, 0.125f, 1f);
-		public GraphViewer()
+        const int offsetH = 600;
+        const int deltaV = 230;
+
+        static readonly Color BGColor = new Color(0.125f, 0.125f, 0.125f, 1f);
+        static readonly Color CurrentBorderColor = new Color(0.849f, 0.514f, 0.1f, 1);
+
+        public GraphViewer()
 		{
-			style.backgroundColor =  BGColor;
+			style.backgroundColor = BGColor;
 			SetupZoom(0.05f, 2f);
 			this.StretchToParentSize();
 			this.AddManipulator(new ContentDragger());
@@ -19,104 +24,108 @@ namespace AssetReferenceViewer
 			this.AddManipulator(new ClickSelector());
 		}
 
-		public void Initialize(Object current)
+		public void Initialize(Object currentAsset)
 		{
-			contentViewContainer.Clear();
+			graphElements.ForEach(e => RemoveElement(e));
 
-			if (current == null)
-			{
+			if (currentAsset == null)
 				return;
-			}
 
-			var curNode = new NodeMaker(current);
-			curNode.Q("node-border").style.borderLeftColor = NodeMaker.CurBorderColor;
-			curNode.Q("node-border").style.borderRightColor = NodeMaker.CurBorderColor;
-			curNode.Q("node-border").style.borderBottomColor = NodeMaker.CurBorderColor;
-			curNode.Q("node-border").style.borderTopColor = NodeMaker.CurBorderColor;
-			AddElement(curNode);
+			var currentNode = new NodeMaker(currentAsset);
+			var nodeBorder = currentNode.Q("node-border");
+			nodeBorder.style.borderLeftColor = CurrentBorderColor;
+            nodeBorder.style.borderRightColor = CurrentBorderColor;
+            nodeBorder.style.borderTopColor = CurrentBorderColor;
+			nodeBorder.style.borderBottomColor = CurrentBorderColor;
+			nodeBorder.style.borderLeftWidth = nodeBorder.style.borderRightWidth =
+				nodeBorder.style.borderTopWidth = nodeBorder.style.borderBottomWidth = 4;
+			AddElement(currentNode);
 
-			const int offsetH = 600;
-			const int deltaV = 260;
-			AssetInfo selectedAssetInfo = AssetReferenceViewer.GetAsset(AssetDatabase.GetAssetPath(current));
-			if (selectedAssetInfo != null)
+			AssetInfo selectedAssetInfo = AssetReferenceViewer.GetAsset(AssetDatabase.GetAssetPath(currentAsset));
+			if (selectedAssetInfo == null)
+				return;
+
+			Rect fullRect = new Rect();
+			fullRect.xMin = -offsetH;
+			fullRect.xMax = offsetH + 136;
+			int i = 0;
+
 			{
+				var deps = selectedAssetInfo.dependencies;
+				var half = deps.Count / 2;
+				bool even = deps.Count % 2 == 0;
 
-				var i = 0;
-
+				foreach (var d in deps)
 				{
-					var deps = selectedAssetInfo.dependencies;
-					var half = deps.Count / 2;
-					bool even = deps.Count % 2 == 0;
-
-					foreach (var d in deps)
+					var item = d;
+					var obj = AssetDatabase.LoadAssetAtPath(item, typeof(Object));
+					if (obj == null)
 					{
-						var item = d;
-						var obj = AssetDatabase.LoadAssetAtPath(item, typeof(Object));
-						if (obj == null)
-						{
-							AssetReferenceViewer.RebuildDatabase();
-							return;
-						}
-						else
-						{
-							var node = new NodeMaker(obj);
-							node.style.left = - offsetH;
-							node.style.top = (i - half) * deltaV + (even ? deltaV/2 : 0);
-
-							node.AddManipulator(new DoubleClickManipulator(()=>
-							{
-								Selection.activeObject = obj;
-								Initialize(obj);
-							}));
-
-							AddElement(node);
-
-							var edge = curNode.InPort.ConnectTo(node.OutPort);
-							AddElement(edge);
-						}
-
-						i++;
+						AssetReferenceViewer.RebuildDatabase();
+						Selection.activeObject = currentAsset;
+						return;
 					}
+					
+					var node = new NodeMaker(obj);
+					node.style.left = - offsetH;
+					node.style.top = (i - half) * deltaV + (even ? deltaV * 0.5f : 0);
 
-					i = 0;
+					fullRect.yMin = Mathf.Min(fullRect.yMin, node.style.top.value.value);
+					fullRect.yMax = Mathf.Max(fullRect.yMax, node.style.top.value.value + deltaV);
+
+					node.AddManipulator(new DoubleClickManipulator(()=>
+					{
+						Selection.activeObject = obj;
+					}));
+
+					AddElement(node);
+
+					var edge = currentNode.InPort.ConnectTo(node.OutPort);
+					AddElement(edge);
+
+					i++;
 				}
 
-				{
-					var refs = selectedAssetInfo.references;
-					var half = refs.Count / 2;
-					bool even = refs.Count % 2 == 0;
-					foreach (var r in refs)
-					{
-						var item = r;
-						var path = string.Join("/", item);
-						var obj = AssetDatabase.LoadAssetAtPath(path, typeof(Object));
-						if (obj == null)
-						{
-							Debug.LogError(item);
-						}
-						else
-						{
-							var node = new NodeMaker(obj);
-							node.style.left = offsetH;
-							node.style.top = (i - half) * deltaV + (even ? deltaV / 2 : 0);
-
-							node.AddManipulator(new DoubleClickManipulator(() =>
-							{
-								Selection.activeObject = obj;
-								Initialize(obj);
-							}));
-
-							AddElement(node);
-
-							var edge = curNode.OutPort.ConnectTo(node.InPort);
-							AddElement(edge);
-						}
-
-						i++;
-					}
-				}
-
+				i = 0;
 			}
+
+			{
+				var references = selectedAssetInfo.references;
+				var half = references.Count / 2;
+				bool even = references.Count % 2 == 0;
+				foreach (var reference in references)
+				{
+					var obj = AssetDatabase.LoadAssetAtPath(reference, typeof(Object));
+					if (obj == null)
+					{
+                        AssetReferenceViewer.RebuildDatabase();
+                        Selection.activeObject = currentAsset;
+                        return;
+                    }
+
+					var node = new NodeMaker(obj);
+					node.style.left = offsetH;
+					node.style.top = (i - half) * deltaV + (even ? deltaV * 0.5f : 0);
+
+                    fullRect.yMin = Mathf.Min(fullRect.yMin, node.style.top.value.value);
+                    fullRect.yMax = Mathf.Max(fullRect.yMax, node.style.top.value.value + deltaV);
+
+                    node.AddManipulator(new DoubleClickManipulator(() =>
+					{
+						Selection.activeObject = obj;
+					}));
+
+					AddElement(node);
+
+					var edge = currentNode.OutPort.ConnectTo(node.InPort);
+					AddElement(edge);
+
+					i++;
+				}
+			}
+
+			CalculateFrameTransform(fullRect, layout, 5, out var frameTranslation, out var frameScaling);
+			UpdateViewTransform(frameTranslation, frameScaling);
 		}
 
 		protected override bool canCutSelection => false;

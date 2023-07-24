@@ -9,39 +9,40 @@ namespace AssetReferenceViewer
 {
 	public class NodeMaker : Node
 	{
-		private const int width = 136;
-		private const int heigth = 230;
-		private static readonly Color InColor = Color.red * 0.95f;
-		private static readonly Color OutColor = Color.green * 0.95f;
-		public static readonly Color CurBorderColor = new Color(0.849f, 0.514f, 0.1f, 1);
-		private string Path { get; }
-		private int PathHashCode { get; }
+		const int width = 136;
+
+		static readonly Color InColor = Color.red * 0.95f;
+		static readonly Color OutColor = Color.green * 0.95f;
+
+        readonly string path;
 
 		public NodeMaker(UnityEngine.Object obj)
 		{
-			Path = AssetDatabase.GetAssetPath(obj);
-			PathHashCode = Path.GetHashCode();
+			path = AssetDatabase.GetAssetPath(obj);
 
 			style.width = width;
-			if (titleContainer.Q("title-label")?.style is IStyle tempstyle)
+			if (titleContainer.Q("title-label")?.style is IStyle tempStyle)
 			{
-				tempstyle.fontSize = 14;
-				tempstyle.unityFontStyleAndWeight = FontStyle.BoldAndItalic;
-				tempstyle.color = Color.white * 0.95f;
+				tempStyle.fontSize = 14;
+				tempStyle.unityFontStyleAndWeight = FontStyle.BoldAndItalic;
+				tempStyle.color = Color.white * 0.95f;
 			}
 
 			title = obj.name;
+			tooltip = path;
 
 			var controlsContainer = new VisualElement {name = "resource"};
 			mainContainer.Add(controlsContainer);
 
-			var of = new ObjectField {value = obj};
-			of.SetCanSelect(false);
-			controlsContainer.Add(of);
+			var objectField = new ObjectField {value = obj};
+            var selector = objectField.Q<VisualElement>(className: ObjectField.selectorUssClassName);
+            if (selector != null)
+				selector.style.display = DisplayStyle.None;
+            controlsContainer.Add(objectField);
 
 			var img = new Image
 			{
-				style = {height = 128, width = 128},
+				style = { height = 128, width = 128 },
 				image = AssetPreview.GetAssetPreview(obj) ?? AssetPreview.GetMiniThumbnail(obj)
 			};
 			controlsContainer.Add(img);
@@ -60,22 +61,18 @@ namespace AssetReferenceViewer
 		public Port OutPort { get; private set; }
 		public Port InPort { get; private set; }
 
-		public override bool IsMovable()
-		{
-			return false;
-		}
+		public override bool IsMovable() => false;
 	}
 
 	public class DoubleClickManipulator : ClickSelector
 	{
-		private Action callback;
+		private readonly Action callback;
+		private DateTime lastClick = DateTime.MinValue;
 
 		public DoubleClickManipulator(Action callback)
 		{
 			this.callback = callback;
 		}
-
-		private DateTime LastClick { get; set; } = DateTime.MinValue;
 
 		protected override void RegisterCallbacksOnTarget()
 		{
@@ -89,33 +86,14 @@ namespace AssetReferenceViewer
 
 		void OnMouseDown2(MouseDownEvent evt)
 		{
-			if ((DateTime.Now - LastClick).TotalSeconds < 0.8f)
+			if ((DateTime.Now - lastClick).TotalSeconds < 0.8f)
 			{
-				//Debug.LogError("test");
 				callback?.Invoke();
+				lastClick = DateTime.MinValue;
 			}
 			else
 			{
-				LastClick = DateTime.Now;
-			}
-		}
-	}
-
-	public static class Ex
-	{
-		public static void SetCanSelect(this ObjectField field, bool isCan)
-		{
-			if (field == null)
-			{
-				return;
-			}
-
-			foreach (var item in field.Children())
-			{
-				if (item.GetType().Name == "ObjectFieldSelector")
-				{
-					item.style.width = isCan ? 18 : 0;
-				}
+				lastClick = DateTime.Now;
 			}
 		}
 	}

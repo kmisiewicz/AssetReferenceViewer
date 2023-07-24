@@ -16,7 +16,8 @@ namespace AssetReferenceViewer
         {
             pathToAssetInfo = new Dictionary<string, AssetInfo>();
             var assetInfos = Data.AssetInfos;
-            for (int i = 0; i < assetInfos.Length; i++) {
+            for (int i = 0; i < assetInfos.Length; i++)
+            {
                 pathToAssetInfo.Add(assetInfos[i].path, assetInfos[i]);
             }
         }
@@ -85,6 +86,9 @@ namespace AssetReferenceViewer
         public static void ClearDatabase()
         {
             pathToAssetInfo.Clear();
+            Data.AssetInfos = new AssetInfo[0];
+            Data.Save();
+            Data.IsUpToDate = false;
         }
 
         public static void RebuildDatabase()

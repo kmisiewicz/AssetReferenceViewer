@@ -9,9 +9,8 @@ namespace AssetReferenceViewer
 {
 	public class Window : EditorWindow, IHasCustomMenu
 	{
-		private VisualTreeAsset visualTree = null;
-		private TemplateContainer container;
-		private GraphViewer graphViewer;
+		GraphViewer graphViewer;
+		VisualTreeAsset itemTemplate;
 
 		[MenuItem("Assets/Asset Reference Viewer", true)]
 		public static bool ShowWindowValidate()
@@ -23,7 +22,10 @@ namespace AssetReferenceViewer
 		public static void ShowWindow()
 		{
 			var window = GetWindow<Window>();
-			window.titleContent = new GUIContent("Asset Reference Viewer");
+            var content = EditorGUIUtility.IconContent(EditorGUIUtility.isProSkin ?
+                "d_Linked" : "Linked");
+			content.text = "Asset Reference Viewer";
+			window.titleContent = content;
 		}
 
 		public Window()
@@ -31,46 +33,74 @@ namespace AssetReferenceViewer
 			Selection.selectionChanged += OnSelectionChanged;
 		}
 
-		private void OnDestroy()
+		void OnDestroy()
 		{
 			Selection.selectionChanged -= OnSelectionChanged;
 		}
 
-		private void OnSelectionChanged()
+		void OnSelectionChanged()
 		{
 			Initialize();
 		}
 
-		private void OnEnable()
+        void CreateGUI()
+        {
+            var visualTree = Resources.Load<VisualTreeAsset>("AssetReferenceViewer");
+            VisualElement root = visualTree.Instantiate();
+            root.style.flexGrow = 1;
+            rootVisualElement.Add(root);
+
+			CreateGraph();			
+
+			itemTemplate = Resources.Load<VisualTreeAsset>("Item");
+
+            Initialize();
+        }
+
+		void CreateGraph()
 		{
-			Initialize();
-		}
-
-		private void Initialize()
-		{
-			if (Selection.activeObject == null) return;
-
-			visualTree = Resources.Load<VisualTreeAsset>("AssetReferenceViewer");
-			var rootView = rootVisualElement;
-			var root = visualTree.CloneTree().Q<VisualElement>("Root");
-			rootView.Clear();
-			rootView.Add(root);
-
-			graphViewer = new GraphViewer();
-			graphViewer.Initialize(Selection.activeObject);
-			var graph = rootView.Q<VisualElement>("Graph");
+            var graph = rootVisualElement.Q<VisualElement>("Graph");
+			graph.Clear();
+            graphViewer = new GraphViewer();
 			graph.Add(graphViewer);
+            EditorApplication.delayCall += () =>
+            {
+                graphViewer.FrameAll();
+                EditorApplication.delayCall += () => graphViewer.FrameAll();
+            };
+        }
 
-			var helpBox = root.Q<VisualElement>("HelpBox");
+        void Initialize()
+		{
+			if (Selection.activeObject == null)
+				return;
+
+			if (graphViewer == null)
+				CreateGraph();
+			graphViewer.Initialize(Selection.activeObject);
+
+			var helpBox = rootVisualElement.Q<VisualElement>("HelpBox");
 			helpBox.style.display = DisplayStyle.None;
 
 			string selectedPath = AssetDatabase.GetAssetPath(Selection.activeObject);
 
-			var objName = root.Q<Label>("ObjName");
+            if (Directory.Exists(selectedPath))
+                return;
+
+            AssetInfo selectedAssetInfo = AssetReferenceViewer.GetAsset(selectedPath);
+
+            if (selectedAssetInfo == null)
+            {
+                AssetReferenceViewer.RebuildDatabase();
+                EditorApplication.delayCall += Initialize;
+                return;
+            }
+
+            var objName = rootVisualElement.Q<Label>("ObjName");
 			objName.text = Selection.activeObject.name;
-			var objPath = root.Q<Label>("Path");
+			var objPath = rootVisualElement.Q<Label>("Path");
 			objPath.text = selectedPath;
-			var icon = root.Q<VisualElement>("AssetIcon");
+			var icon = rootVisualElement.Q<VisualElement>("AssetIcon");
 			icon.style.backgroundImage = new StyleBackground((Texture2D) AssetDatabase.GetCachedIcon(selectedPath));
 
 			if (!selectedPath.StartsWith("Assets/"))
@@ -80,38 +110,26 @@ namespace AssetReferenceViewer
 				return;
 			}
 
-			var scroll = root.Q<ScrollView>("Scroll");
-
-			if (Directory.Exists(selectedPath))
-				return;
-
-			AssetInfo selectedAssetInfo = AssetReferenceViewer.GetAsset(selectedPath);
-
-			if (selectedAssetInfo == null)
-			{
-				AssetReferenceViewer.RebuildDatabase();
-				EditorApplication.delayCall = Initialize;
-				return;
-			}
-
-			var buildStatusIcon = root.Q<VisualElement>("BuildStatusIcon");
+			var scroll = rootVisualElement.Q<ScrollView>("Scroll");
+						
+			var buildStatusIcon = rootVisualElement.Q<VisualElement>("BuildStatusIcon");
 			buildStatusIcon.style.backgroundImage =
 				selectedAssetInfo.IsIncludedInBuild ? ProjectIcons.LinkBlue : ProjectIcons.LinkBlack;
 			buildStatusIcon.tooltip = selectedAssetInfo.IncludedStatus.ToString();
 
-			var dependenciesFoldout = root.Q<Foldout>("Dependencies");
+			var dependenciesFoldout = rootVisualElement.Q<Foldout>("Dependencies");
 			dependenciesFoldout.Clear();
 			dependenciesFoldout.text = "Dependencies (" + selectedAssetInfo.dependencies.Count + ")";
 			scroll.Add(dependenciesFoldout);
-			var referencesFoldout = root.Q<Foldout>("References");
+			var referencesFoldout = rootVisualElement.Q<Foldout>("References");
 			referencesFoldout.Clear();
 			referencesFoldout.text = "References (" + selectedAssetInfo.references.Count + ")";
 			scroll.Add(referencesFoldout);
 
 			foreach (var d in selectedAssetInfo.dependencies)
 			{
-				var item = visualTree.CloneTree().Q<VisualElement>("Item");
-				var itemIcon = item.Q<VisualElement>("ItemIcon");
+				var item = itemTemplate.Instantiate().Q<VisualElement>("Item");
+                var itemIcon = item.Q<VisualElement>("ItemIcon");
 				var itemLabel = item.Q<Label>("ItemLabel");
 				var inBuildIcon = item.Q<VisualElement>("InBuildIcon");
 
@@ -134,7 +152,7 @@ namespace AssetReferenceViewer
 
 			foreach (var r in selectedAssetInfo.references)
 			{
-				var item = visualTree.CloneTree().Q<VisualElement>("Item");
+				var item = itemTemplate.Instantiate().Q<VisualElement>("Item");
 				var itemIcon = item.Q<VisualElement>("ItemIcon");
 				var itemLabel = item.Q<Label>("ItemLabel");
 				var inBuildIcon = item.Q<VisualElement>("InBuildIcon");
@@ -159,9 +177,9 @@ namespace AssetReferenceViewer
 			if (!selectedAssetInfo.IsIncludedInBuild)
 			{
 				helpBox.style.display = DisplayStyle.Flex;
-				var helpLabel = root.Q<Label>("HelpBoxLabel");
-				var helpButton = root.Q<Button>("HelpButton");
-				var helpIcon = root.Q<VisualElement>("HelpIcon");
+				var helpLabel = rootVisualElement.Q<Label>("HelpBoxLabel");
+				var helpButton = rootVisualElement.Q<Button>("HelpButton");
+				var helpIcon = rootVisualElement.Q<VisualElement>("HelpIcon");
 				helpButton.text = "Delete Asset";
 				helpButton.style.display = DisplayStyle.Flex;
 				helpLabel.text = "This asset is not referenced and never used. Would you like to delete it ?";
@@ -173,12 +191,7 @@ namespace AssetReferenceViewer
 					AssetReferenceViewer.RemoveAssetFromDatabase(selectedPath);
 				};
 			}
-
-			EditorApplication.delayCall = ()=>
-			{
-				graphViewer.FrameAll();
-			};
-		}
+        }
 
 		void IHasCustomMenu.AddItemsToMenu(GenericMenu menu)
 		{
