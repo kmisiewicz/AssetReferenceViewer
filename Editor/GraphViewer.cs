@@ -20,7 +20,6 @@ namespace AssetReferenceViewer
 			this.StretchToParentSize();
 			this.AddManipulator(new ContentDragger());
 			this.AddManipulator(new SelectionDragger());
-			this.AddManipulator(new RectangleSelector());
 			this.AddManipulator(new ClickSelector());
 		}
 
@@ -46,8 +45,8 @@ namespace AssetReferenceViewer
 				return;
 
 			Rect fullRect = new Rect();
-			fullRect.xMin = -offsetH;
-			fullRect.xMax = offsetH + 136;
+			fullRect.xMin = selectedAssetInfo.dependencies.Count > 0 ? -offsetH : 0;
+			fullRect.xMax = selectedAssetInfo.references.Count > 0 ? offsetH + 136 : 136;
 			int i = 0;
 
 			{
