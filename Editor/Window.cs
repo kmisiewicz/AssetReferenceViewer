@@ -87,6 +87,26 @@ namespace AssetReferenceViewer
             if (Directory.Exists(selectedPath))
                 return;
 
+			HelpBox helpB = rootVisualElement.Q<HelpBox>("HelpboxOutsideAssets");
+            if (!selectedPath.StartsWith("Assets/"))
+            {
+				if (helpB == null)
+				{
+					helpB = new HelpBox("This asset is outside Assets folder or you selected something in the scene", HelpBoxMessageType.Warning);
+					helpB.name = "HelpboxOutsideAssets";
+					graphViewer.Add(helpB);
+				}
+				else
+				{
+					helpB.style.display = DisplayStyle.Flex;
+				}
+                return;
+            }
+			else if (helpB != null)
+			{
+                helpB.style.display = DisplayStyle.None;
+            }
+
             AssetInfo selectedAssetInfo = AssetReferenceViewer.GetAsset(selectedPath);
 
             if (selectedAssetInfo == null)
@@ -102,13 +122,6 @@ namespace AssetReferenceViewer
 			objPath.text = selectedPath;
 			var icon = rootVisualElement.Q<VisualElement>("AssetIcon");
 			icon.style.backgroundImage = new StyleBackground((Texture2D) AssetDatabase.GetCachedIcon(selectedPath));
-
-			if (!selectedPath.StartsWith("Assets/"))
-			{
-				var helpB = new HelpBox("This asset is outside Assets folder or you selected something in the scene", HelpBoxMessageType.Warning);
-				graphViewer.Add(helpB);
-				return;
-			}
 
 			var scroll = rootVisualElement.Q<ScrollView>("Scroll");
 						
