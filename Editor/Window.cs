@@ -1,16 +1,16 @@
-using System;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
-using System.IO;
 using Object = UnityEngine.Object;
 
 namespace AssetReferenceViewer
 {
-	public class Window : EditorWindow, IHasCustomMenu
+    public class Window : EditorWindow, IHasCustomMenu
 	{
 		GraphViewer graphViewer;
 		VisualTreeAsset itemTemplate;
+		bool locked = false;
 
 		[MenuItem("Assets/Asset Reference Viewer", true)]
 		public static bool ShowWindowValidate()
@@ -40,7 +40,8 @@ namespace AssetReferenceViewer
 
 		void OnSelectionChanged()
 		{
-			Initialize();
+			if (!locked)
+				Initialize();
 		}
 
         void CreateGUI()
@@ -208,13 +209,19 @@ namespace AssetReferenceViewer
 
 		void IHasCustomMenu.AddItemsToMenu(GenericMenu menu)
 		{
-			menu.AddItem(new GUIContent("Rebuild Database"), false, ()=>
+			menu.AddItem(new GUIContent("Rebuild Database"), false, () =>
 			{
 				AssetReferenceViewer.RebuildDatabase();
 				Initialize();
 			});
 			menu.AddItem(new GUIContent("Clear Database"), false, AssetReferenceViewer.ClearDatabase);
 			menu.AddItem(new GUIContent("Project Overlay"), WindowOverlay.Enabled, () => { WindowOverlay.Enabled = !WindowOverlay.Enabled; });
+			menu.AddItem(new GUIContent("Lock"), locked, () => 
+			{
+				locked = !locked;
+				if (!locked)
+					Initialize();
+			});
 		}
 	}
 }
