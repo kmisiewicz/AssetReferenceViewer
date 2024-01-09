@@ -26,7 +26,9 @@ namespace AssetReferenceViewer
                 "d_Linked" : "Linked");
 			content.text = "Asset Reference Viewer";
 			window.titleContent = content;
-		}
+
+            window.Initialize();
+        }
 
 		public Window()
 		{
@@ -54,8 +56,6 @@ namespace AssetReferenceViewer
 			CreateGraph();			
 
 			itemTemplate = Resources.Load<VisualTreeAsset>("Item");
-
-            Initialize();
         }
 
 		void CreateGraph()
