@@ -7,8 +7,9 @@ namespace AssetReferenceViewer
 {
 	public class GraphViewer : GraphView
 	{
-        const int offsetH = 600;
-        const int deltaV = 230;
+        const int OFFSET_H = 600;
+		const int PADDING_RIGHT = 136;
+        const int DELTA_V = 230;
 
         static readonly Color BGColor = new Color(0.125f, 0.125f, 0.125f, 1f);
         static readonly Color CurrentBorderColor = new Color(0.849f, 0.514f, 0.1f, 1);
@@ -32,10 +33,8 @@ namespace AssetReferenceViewer
 
 			var currentNode = new NodeMaker(currentAsset);
 			var nodeBorder = currentNode.Q("node-border");
-			nodeBorder.style.borderLeftColor = CurrentBorderColor;
-            nodeBorder.style.borderRightColor = CurrentBorderColor;
-            nodeBorder.style.borderTopColor = CurrentBorderColor;
-			nodeBorder.style.borderBottomColor = CurrentBorderColor;
+			nodeBorder.style.borderLeftColor = nodeBorder.style.borderRightColor =
+                nodeBorder.style.borderBottomColor = nodeBorder.style.borderTopColor = CurrentBorderColor;
 			nodeBorder.style.borderLeftWidth = nodeBorder.style.borderRightWidth =
 				nodeBorder.style.borderTopWidth = nodeBorder.style.borderBottomWidth = 4;
 			AddElement(currentNode);
@@ -44,10 +43,14 @@ namespace AssetReferenceViewer
 			if (selectedAssetInfo == null)
 				return;
 
-			Rect fullRect = new Rect();
-			fullRect.xMin = selectedAssetInfo.dependencies.Count > 0 ? -offsetH : 0;
-			fullRect.xMax = selectedAssetInfo.references.Count > 0 ? offsetH + 136 : 136;
-			int i = 0;
+            Rect fullRect = new Rect
+            {
+                xMin = selectedAssetInfo.dependencies.Count > 0 ? -OFFSET_H : 0,
+                xMax = selectedAssetInfo.references.Count > 0 ? OFFSET_H + PADDING_RIGHT : PADDING_RIGHT,
+                yMax = DELTA_V
+            };
+
+            int i = 0;
 
 			{
 				var deps = selectedAssetInfo.dependencies;
@@ -66,11 +69,11 @@ namespace AssetReferenceViewer
 					}
 					
 					var node = new NodeMaker(obj);
-					node.style.left = - offsetH;
-					node.style.top = (i - half) * deltaV + (even ? deltaV * 0.5f : 0);
+					node.style.left = - OFFSET_H;
+					node.style.top = (i - half) * DELTA_V + (even ? DELTA_V * 0.5f : 0);
 
 					fullRect.yMin = Mathf.Min(fullRect.yMin, node.style.top.value.value);
-					fullRect.yMax = Mathf.Max(fullRect.yMax, node.style.top.value.value + deltaV);
+					fullRect.yMax = Mathf.Max(fullRect.yMax, node.style.top.value.value + DELTA_V);
 
 					node.AddManipulator(new DoubleClickManipulator(()=>
 					{
@@ -103,11 +106,11 @@ namespace AssetReferenceViewer
                     }
 
 					var node = new NodeMaker(obj);
-					node.style.left = offsetH;
-					node.style.top = (i - half) * deltaV + (even ? deltaV * 0.5f : 0);
+					node.style.left = OFFSET_H;
+					node.style.top = (i - half) * DELTA_V + (even ? DELTA_V * 0.5f : 0);
 
                     fullRect.yMin = Mathf.Min(fullRect.yMin, node.style.top.value.value);
-                    fullRect.yMax = Mathf.Max(fullRect.yMax, node.style.top.value.value + deltaV);
+                    fullRect.yMax = Mathf.Max(fullRect.yMax, node.style.top.value.value + DELTA_V);
 
                     node.AddManipulator(new DoubleClickManipulator(() =>
 					{
