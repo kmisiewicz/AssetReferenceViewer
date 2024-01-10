@@ -48,19 +48,27 @@ namespace AssetReferenceViewer
 
         void CreateGUI()
         {
+			CloneMainTree();
+			CreateGraph();
+        }
+
+		void CloneMainTree()
+		{
             var visualTree = Resources.Load<VisualTreeAsset>("AssetReferenceViewer");
             VisualElement root = visualTree.Instantiate();
             root.style.flexGrow = 1;
             rootVisualElement.Add(root);
-
-			CreateGraph();			
-
-			itemTemplate = Resources.Load<VisualTreeAsset>("Item");
         }
 
 		void CreateGraph()
 		{
             var graph = rootVisualElement.Q<VisualElement>("Graph");
+			if (graph == null)
+			{
+				CloneMainTree();
+                graph = rootVisualElement.Q<VisualElement>("Graph");
+            }
+
 			graph.Clear();
             graphViewer = new GraphViewer();
 			graph.Add(graphViewer);
@@ -69,6 +77,8 @@ namespace AssetReferenceViewer
                 graphViewer.FrameAll();
                 EditorApplication.delayCall += () => graphViewer.FrameAll();
             };
+
+            itemTemplate ??= Resources.Load<VisualTreeAsset>("Item");
         }
 
         void Initialize()
@@ -122,7 +132,7 @@ namespace AssetReferenceViewer
 			var objPath = rootVisualElement.Q<Label>("Path");
 			objPath.text = selectedPath;
 			var icon = rootVisualElement.Q<VisualElement>("AssetIcon");
-			icon.style.backgroundImage = new StyleBackground((Texture2D) AssetDatabase.GetCachedIcon(selectedPath));
+			icon.style.backgroundImage = new StyleBackground((Texture2D)AssetDatabase.GetCachedIcon(selectedPath));
 
 			var scroll = rootVisualElement.Q<ScrollView>("Scroll");
 						
@@ -140,7 +150,8 @@ namespace AssetReferenceViewer
 			referencesFoldout.text = "References (" + selectedAssetInfo.references.Count + ")";
 			scroll.Add(referencesFoldout);
 
-			foreach (var d in selectedAssetInfo.dependencies)
+            itemTemplate ??= Resources.Load<VisualTreeAsset>("Item");
+            foreach (var d in selectedAssetInfo.dependencies)
 			{
 				var item = itemTemplate.Instantiate().Q<VisualElement>("Item");
                 var itemIcon = item.Q<VisualElement>("ItemIcon");
